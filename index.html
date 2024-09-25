@@ -10,7 +10,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-direction: column;
             height: 100vh;
             background-color: #f4f4f9;
             margin: 0;
@@ -22,7 +21,6 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             width: 300px;
-            margin-bottom: 20px;
         }
         h1 {
             color: #333;
@@ -81,12 +79,6 @@
             background-color: #bbb;
             cursor: not-allowed;
         }
-        #message {
-            font-size: 18px;
-            color: #333;
-            margin-top: 20px;
-            display: none;
-        }
         @keyframes highlight {
             0% { background-color: transparent; }
             100% { background-color: #a8e6cf; }
@@ -96,15 +88,10 @@
             40% { transform: translateY(-10px); }
             60% { transform: translateY(-5px); }
         }
-        footer {
-            font-size: 14px;
-            color: #666;
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
-    <div class="container" id="quizContainer">
+    <div class="container">
         <h1>Bible Quiz Wordle</h1>
         <p class="clue" id="clueText"></p>
         <div id="questionNumber"></div>
@@ -112,11 +99,6 @@
         <input type="text" id="guess" maxlength="6" placeholder="Masukkan jawaban" oninput="toggleButton()">
         <button id="submitBtn" onclick="checkAnswer()" disabled>Submit</button>
     </div>
-
-    <div id="message">Terima kasih telah bermain! Selamat atas pencapaian Anda!</div>
-    <canvas id="confettiCanvas"></canvas>
-
-    <footer>Dibuat oleh Logic Math team</footer>
 
     <script>
         const questions = [
@@ -141,30 +123,18 @@
                 answer: "DAUD"
             },
             {
+                clue: "Lahir di Ramataim-Zofim, Mengumpulkan bangsanya di Mizpa, dimana di sana mereka berpuasa dan berdoa, serta mempersiapkan diri untuk perang besar melawan bangsa Filistin, Ia menyadari bahwa Saul adalah calon raja ketika Saul dan pembantunya mencari keledai ayahnya yang hilang, pembantunya menyarankan untuk berkonsultasi dengannya yang berada di dekatnya.",
+                answer: "SAMUEL"
+            },
+            {
                 clue: "Sangat bijaksana, Menafsirkan mimpi raja Nebukadnezar, Difitnah hingga dimasukkan ke gua singa",
                 answer: "DANIEL"
-            },
-            {
-                clue: "Seorang nabi kecil, Memimpin pembangunan kembali tembok Yerusalem, Terdapat orang-orang yang ingin membunuhnya",
-                answer: "NEHEMIA"
-            },
-            {
-                clue: "Imam Besar Israel, Memiliki adik yang ditemukan Bangsa Firaun, Adiknya pernah membunuh salah satu orang Firaun",
-                answer: "HARUN"
-            },
-            {
-                clue: "Menjadi Wazir (Perdana Menteri) Mesir ketika ia berumur 30 tahun, serta diberi nama Zafnat-Paaneah, Diberi jubah warna warni oleh ayahnya (ketonet passim), Meninggal pada umur 110 tahun, tetapi sebelum meninggal meminta saudara-saudara dan keluarganya untuk bersumpah agar tulang-tulangnya dikuburkan di tanah Kanaan",
-                answer: "YUSUF"
             }
         ];
 
         let currentQuestionIndex = 0;
 
         function loadQuestion() {
-            if (currentQuestionIndex >= questions.length) {
-                showCompletionMessage();
-                return;
-            }
             const currentQuestion = questions[currentQuestionIndex];
             document.getElementById("clueText").textContent = currentQuestion.clue;
             document.getElementById("questionNumber").textContent = `Pertanyaan ${currentQuestionIndex + 1} dari ${questions.length}`;
@@ -187,10 +157,12 @@
             let correct = true;
             const letterCounts = {};
 
+            // Count occurrences of each letter in the answer
             for (let letter of currentAnswer) {
                 letterCounts[letter] = (letterCounts[letter] || 0) + 1;
             }
 
+            // First pass: check for correct positions
             for (let i = 0; i < currentAnswer.length; i++) {
                 const letterBox = document.getElementById(`letter${i + 1}`);
                 letterBox.classList.remove('correct', 'incorrect', 'present');
@@ -204,6 +176,7 @@
                 }
             }
 
+            // Second pass: check for present letters
             for (let i = 0; i < currentAnswer.length; i++) {
                 const letterBox = document.getElementById(`letter${i + 1}`);
                 if (!letterBox.classList.contains('correct')) {
@@ -219,8 +192,10 @@
             }
 
             if (correct) {
-                currentQuestionIndex++;
-                setTimeout(loadQuestion, 1000);
+                setTimeout(() => {
+                    currentQuestionIndex = (currentQuestionIndex + 1) % questions.length;
+                    loadQuestion();
+                }, 1000);
             }
         }
 
@@ -228,57 +203,6 @@
             const userGuess = document.getElementById("guess").value;
             const submitBtn = document.getElementById("submitBtn");
             submitBtn.disabled = userGuess.length !== questions[currentQuestionIndex].answer.length;
-        }
-
-        function showCompletionMessage() {
-            document.getElementById("quizContainer").style.display = "none";
-            document.getElementById("message").style.display = "block";
-            startConfetti();
-        }
-
-        function startConfetti() {
-            const confettiCanvas = document.getElementById('confettiCanvas');
-            const confettiContext = confettiCanvas.getContext('2d');
-            confettiCanvas.width = window.innerWidth;
-            confettiCanvas.height = window.innerHeight;
-
-            const confettiParticles = Array.from({length: 200}, () => ({
-                x: Math.random() * confettiCanvas.width,
-                y: Math.random() * confettiCanvas.height - confettiCanvas.height,
-                r: Math.random() * 6 + 1,
-                d: Math.random() * 200 + 200,
-                color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-                tilt: Math.random() * 10 - 10,
-            }));
-
-            function drawConfetti() {
-                confettiContext.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-                confettiParticles.forEach(p => {
-                    confettiContext.beginPath();
-                    confettiContext.arc(p.x, p.y, p.r, 0, Math.PI * 2, false);
-                    confettiContext.fillStyle = p.color;
-                    confettiContext.fill();
-                });
-                updateConfetti();
-            }
-
-            function updateConfetti() {
-                confettiParticles.forEach(p => {
-                    p.y += Math.cos(p.d) + 1 + p.r / 2;
-                    p.x += Math.sin(p.d);
-                    if (p.x > confettiCanvas.width + 5 || p.x < -5 || p.y > confettiCanvas.height) {
-                        if (Math.sin(p.d) > 0) {
-                            p.x = -5;
-                            p.y = Math.random() * confettiCanvas.height;
-                        } else {
-                            p.x = confettiCanvas.width + 5;
-                            p.y = Math.random() * confettiCanvas.height;
-                        }
-                    }
-                });
-            }
-
-            setInterval(drawConfetti, 20);
         }
 
         loadQuestion();
