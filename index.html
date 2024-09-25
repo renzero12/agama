@@ -15,49 +15,111 @@
             background-color: #f4f4f9;
             margin: 0;
         }
+
+        /* Splash Screen Styles */
+        .splash-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .splash-screen img {
+            width: 150px;
+            margin-bottom: 20px;
+        }
+
+        .splash-screen button {
+            padding: 15px 30px;
+            font-size: 18px;
+            color: #fff;
+            background-color: #333;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .splash-screen button:hover {
+            background-color: #555;
+        }
+
+        .splash-screen button:active {
+            transform: scale(0.95);
+        }
+
+        /* Animation bounce */
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* Existing Container Styles */
         .container {
             text-align: center;
             background-color: #fff;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 320px;
+            width: 400px;
             margin-bottom: 20px;
+            display: none; /* Initially hidden */
         }
+
         h1 {
             color: #333;
         }
+
         .clue {
             font-size: 14px;
             color: #666;
             margin-bottom: 20px;
         }
+
+        #answer {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
         .letter-box {
             width: 50px;
             height: 50px;
             border: 2px solid #ddd;
             border-radius: 5px;
-            display: inline-flex;
+            display: flex;
             justify-content: center;
             align-items: center;
             font-size: 24px;
-            margin: 2px;
             background-color: #fff;
             transition: transform 0.3s, background-color 0.3s;
         }
+
         .correct {
             background-color: #a8e6cf;
             border-color: #a8e6cf;
             animation: highlight 0.5s forwards;
         }
+
         .present {
             background-color: #ffeb3b;
             border-color: #ffeb3b;
         }
+
         .incorrect {
             background-color: #ff8b94;
             border-color: #ff8b94;
         }
+
         input[type="text"] {
             padding: 10px;
             font-size: 16px;
@@ -66,6 +128,7 @@
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+
         button {
             margin-top: 10px;
             padding: 10px 20px;
@@ -77,24 +140,29 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
+
         button:disabled {
             background-color: #bbb;
             cursor: not-allowed;
         }
+
         @keyframes highlight {
             0% { background-color: transparent; }
             100% { background-color: #a8e6cf; }
         }
+
         @keyframes bounce {
             0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
             40% { transform: translateY(-10px); }
             60% { transform: translateY(-5px); }
         }
+
         .footer {
             font-size: 14px;
             color: #666;
             margin-top: 20px;
         }
+
         .thank-you {
             display: none;
             font-size: 18px;
@@ -104,6 +172,13 @@
     </style>
 </head>
 <body>
+    <!-- Splash Screen -->
+    <div class="splash-screen">
+        <img src="https://upload.wikimedia.org/wikipedia/id/0/0f/Logo_BPK_PENABUR.png" alt="Logo BPK PENABUR">
+        <button onclick="startGame()">Start</button>
+    </div>
+
+    <!-- Game Container -->
     <div class="container">
         <h1>Bible Quiz Wordle</h1>
         <p class="clue" id="clueText"></p>
@@ -113,11 +188,18 @@
         <button id="submitBtn" onclick="checkAnswer()" disabled>Submit</button>
         <p class="thank-you" id="thankYouMessage">Terima kasih telah bermain!</p>
     </div>
+
     <div class="footer">
         Dibuat oleh Logic Math
     </div>
 
     <script>
+        function startGame() {
+            document.querySelector('.splash-screen').style.display = 'none';
+            document.querySelector('.container').style.display = 'block';
+            loadQuestion();
+        }
+
         const questions = [
             {
                 clue: "Nabi yang diutus ke Niniwe, Berusaha melarikan diri ke Tarsis, Ditelan ikan besar selama tiga hari",
@@ -242,8 +324,6 @@
             const submitBtn = document.getElementById("submitBtn");
             submitBtn.disabled = userGuess.length !== questions[currentQuestionIndex].answer.length;
         }
-
-        loadQuestion();
     </script>
 </body>
 </html>
