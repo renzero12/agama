@@ -48,6 +48,10 @@
             border-color: #a8e6cf;
             animation: highlight 0.5s forwards;
         }
+        .present {
+            background-color: #ffeb3b;
+            border-color: #ffeb3b;
+        }
         .incorrect {
             background-color: #ff8b94;
             border-color: #ff8b94;
@@ -99,6 +103,14 @@
     <script>
         const questions = [
             {
+                clue: "Nabi yang diutus ke Niniwe, Berusaha melarikan diri ke Tarsis, Ditelan ikan besar selama tiga hari",
+                answer: "YUNUS"
+            },
+            {
+                clue: "Raja yang membangun Bait Allah, Anak dari Daud, Dikenal karena kebijaksanaannya",
+                answer: "SALOMO"
+            },
+            {
                 clue: "Tidak memiliki ayah dan ibu, Diasuh oleh Mordhekai, Seorang Yahudi yang menjadi ratu",
                 answer: "ESTER"
             },
@@ -139,19 +151,42 @@
             const userGuess = document.getElementById("guess").value.toUpperCase();
             const currentAnswer = questions[currentQuestionIndex].answer;
             let correct = true;
+            const letterCounts = {};
+
+            // Count occurrences of each letter in the answer
+            for (let letter of currentAnswer) {
+                letterCounts[letter] = (letterCounts[letter] || 0) + 1;
+            }
+
+            // First pass: check for correct positions
             for (let i = 0; i < currentAnswer.length; i++) {
                 const letterBox = document.getElementById(`letter${i + 1}`);
-                letterBox.classList.remove('correct', 'incorrect');
+                letterBox.classList.remove('correct', 'incorrect', 'present');
                 if (userGuess[i] === currentAnswer[i]) {
                     letterBox.textContent = currentAnswer[i];
                     letterBox.classList.add('correct');
                     letterBox.style.animation = 'bounce 0.5s';
+                    letterCounts[currentAnswer[i]]--;
                 } else {
-                    letterBox.textContent = userGuess[i] || '';
-                    letterBox.classList.add('incorrect');
                     correct = false;
                 }
             }
+
+            // Second pass: check for present letters
+            for (let i = 0; i < currentAnswer.length; i++) {
+                const letterBox = document.getElementById(`letter${i + 1}`);
+                if (!letterBox.classList.contains('correct')) {
+                    if (currentAnswer.includes(userGuess[i]) && letterCounts[userGuess[i]] > 0) {
+                        letterBox.textContent = userGuess[i];
+                        letterBox.classList.add('present');
+                        letterCounts[userGuess[i]]--;
+                    } else {
+                        letterBox.textContent = userGuess[i] || '';
+                        letterBox.classList.add('incorrect');
+                    }
+                }
+            }
+
             if (correct) {
                 setTimeout(() => {
                     currentQuestionIndex = (currentQuestionIndex + 1) % questions.length;
