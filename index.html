@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bible Quiz Wordle</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        h1 {
+            color: #333;
+        }
+        .clue {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .letter-box {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            margin: 2px;
+            background-color: #fff;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+        .correct {
+            background-color: #a8e6cf;
+            border-color: #a8e6cf;
+            animation: highlight 0.5s forwards;
+        }
+        .incorrect {
+            background-color: #ff8b94;
+            border-color: #ff8b94;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 15px;
+            width: calc(100% - 22px);
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #333;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:disabled {
+            background-color: #bbb;
+            cursor: not-allowed;
+        }
+        @keyframes highlight {
+            0% { background-color: transparent; }
+            100% { background-color: #a8e6cf; }
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bible Quiz Wordle</h1>
+        <p class="clue" id="clueText"></p>
+        <div id="questionNumber"></div>
+        <div id="answer"></div>
+        <input type="text" id="guess" maxlength="6" placeholder="Masukkan jawaban" oninput="toggleButton()">
+        <button id="submitBtn" onclick="checkAnswer()" disabled>Submit</button>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                clue: "Tidak memiliki ayah dan ibu, Diasuh oleh Mordhekai, Seorang Yahudi yang menjadi ratu",
+                answer: "ESTER"
+            },
+            {
+                clue: "Penjala Ikan Danau Galilea, Dia adalah Kefas, Yesus \"Menurutmu siapakah aku ini?\" Dia menjawab, \"Mesias dari Allah\"",
+                answer: "PETRUS"
+            },
+            {
+                clue: "Pemuda Yehuda, anak Isai, Bersahabat dengan raja pertama Israel, Akhirnya menjadi raja Israel",
+                answer: "DAUD"
+            },
+            {
+                clue: "Sangat bijaksana, Menafsirkan mimpi raja Nebukadnezar, Difitnah hingga dimasukkan ke gua singa",
+                answer: "DANIEL"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+
+        function loadQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            document.getElementById("clueText").textContent = currentQuestion.clue;
+            document.getElementById("questionNumber").textContent = `Pertanyaan ${currentQuestionIndex + 1} dari ${questions.length}`;
+            const answerDiv = document.getElementById("answer");
+            answerDiv.innerHTML = '';
+            for (let i = 0; i < currentQuestion.answer.length; i++) {
+                const letterBox = document.createElement('div');
+                letterBox.className = 'letter-box';
+                letterBox.id = `letter${i + 1}`;
+                answerDiv.appendChild(letterBox);
+            }
+            document.getElementById("guess").setAttribute("maxlength", currentQuestion.answer.length);
+            document.getElementById("guess").value = '';
+            toggleButton();
+        }
+
+        function checkAnswer() {
+            const userGuess = document.getElementById("guess").value.toUpperCase();
+            const currentAnswer = questions[currentQuestionIndex].answer;
+            let correct = true;
+            for (let i = 0; i < currentAnswer.length; i++) {
+                const letterBox = document.getElementById(`letter${i + 1}`);
+                letterBox.classList.remove('correct', 'incorrect');
+                if (userGuess[i] === currentAnswer[i]) {
+                    letterBox.textContent = currentAnswer[i];
+                    letterBox.classList.add('correct');
+                    letterBox.style.animation = 'bounce 0.5s';
+                } else {
+                    letterBox.textContent = userGuess[i] || '';
+                    letterBox.classList.add('incorrect');
+                    correct = false;
+                }
+            }
+            if (correct) {
+                setTimeout(() => {
+                    currentQuestionIndex = (currentQuestionIndex + 1) % questions.length;
+                    loadQuestion();
+                }, 1000);
+            }
+        }
+
+        function toggleButton() {
+            const userGuess = document.getElementById("guess").value;
+            const submitBtn = document.getElementById("submitBtn");
+            submitBtn.disabled = userGuess.length !== questions[currentQuestionIndex].answer.length;
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
