@@ -10,6 +10,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
             height: 100vh;
             background-color: #f4f4f9;
             margin: 0;
@@ -20,7 +21,8 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            width: 320px;
+            margin-bottom: 20px;
         }
         h1 {
             color: #333;
@@ -31,14 +33,14 @@
             margin-bottom: 20px;
         }
         .letter-box {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border: 2px solid #ddd;
             border-radius: 5px;
             display: inline-flex;
             justify-content: center;
             align-items: center;
-            font-size: 18px;
+            font-size: 24px;
             margin: 2px;
             background-color: #fff;
             transition: transform 0.3s, background-color 0.3s;
@@ -88,6 +90,17 @@
             40% { transform: translateY(-10px); }
             60% { transform: translateY(-5px); }
         }
+        .footer {
+            font-size: 14px;
+            color: #666;
+            margin-top: 20px;
+        }
+        .thank-you {
+            display: none;
+            font-size: 18px;
+            color: #333;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -98,6 +111,10 @@
         <div id="answer"></div>
         <input type="text" id="guess" maxlength="6" placeholder="Masukkan jawaban" oninput="toggleButton()">
         <button id="submitBtn" onclick="checkAnswer()" disabled>Submit</button>
+        <p class="thank-you" id="thankYouMessage">Terima kasih telah bermain!</p>
+    </div>
+    <div class="footer">
+        Dibuat oleh Logic Math
     </div>
 
     <script>
@@ -123,18 +140,39 @@
                 answer: "DAUD"
             },
             {
+                clue: "Sangat bijaksana, Menafsirkan mimpi raja Nebukadnezar, Difitnah hingga dimasukkan ke gua singa",
+                answer: "DANIEL"
+            },
+            {
+                clue: "Seorang nabi kecil, Memimpin pembangunan kembali tembok Yerusalem, Terdapat orang-orang yang ingin membunuhnya",
+                answer: "NEHEMIA"
+            },
+            {
+                clue: "Imam Besar Israel, Memiliki adik yang ditemukan Bangsa Firaun, Adiknya pernah membunuh salah satu orang Firaun",
+                answer: "HARUN"
+            },
+            {
                 clue: "Lahir di Ramataim-Zofim, Mengumpulkan bangsanya di Mizpa, dimana di sana mereka berpuasa dan berdoa, serta mempersiapkan diri untuk perang besar melawan bangsa Filistin, Ia menyadari bahwa Saul adalah calon raja ketika Saul dan pembantunya mencari keledai ayahnya yang hilang, pembantunya menyarankan untuk berkonsultasi dengannya yang berada di dekatnya.",
                 answer: "SAMUEL"
             },
             {
-                clue: "Sangat bijaksana, Menafsirkan mimpi raja Nebukadnezar, Difitnah hingga dimasukkan ke gua singa",
-                answer: "DANIEL"
+                clue: "Menjadi Wazir (Perdana Menteri) Mesir ketika ia berumur 30 tahun, serta diberi nama Zafnat-Paaneah, Diberi jubah warna warni oleh ayahnya (ketonet passim), Meninggal pada umur 110 tahun, tetapi sebelum meninggal meminta saudara-saudara dan keluarganya untuk bersumpah agar tulang-tulangnya dikuburkan di tanah Kanaan",
+                answer: "YUSUF"
             }
         ];
 
         let currentQuestionIndex = 0;
 
         function loadQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                document.getElementById("thankYouMessage").style.display = "block";
+                document.getElementById("clueText").style.display = "none";
+                document.getElementById("questionNumber").style.display = "none";
+                document.getElementById("answer").style.display = "none";
+                document.getElementById("guess").style.display = "none";
+                document.getElementById("submitBtn").style.display = "none";
+                return;
+            }
             const currentQuestion = questions[currentQuestionIndex];
             document.getElementById("clueText").textContent = currentQuestion.clue;
             document.getElementById("questionNumber").textContent = `Pertanyaan ${currentQuestionIndex + 1} dari ${questions.length}`;
@@ -193,7 +231,7 @@
 
             if (correct) {
                 setTimeout(() => {
-                    currentQuestionIndex = (currentQuestionIndex + 1) % questions.length;
+                    currentQuestionIndex++;
                     loadQuestion();
                 }, 1000);
             }
