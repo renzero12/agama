@@ -1,9 +1,9 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bible Quiz Wordle</title>
+    <title>Bible Quiz</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -53,6 +53,13 @@
 
         .splash-screen button:active {
             transform: scale(0.95);
+        }
+
+        /* Animation bounce */
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
         }
 
         /* Existing Container Styles */
@@ -162,52 +169,6 @@
             color: #333;
             margin-top: 20px;
         }
-
-        /* Add a new section for the points at the bottom */
-        .points-container {
-            display: flex;
-            justify-content: space-around;
-            margin: 20px 0;
-        }
-
-        .points-group {
-            text-align: center;
-        }
-
-        .points-group h2 {
-            margin: 0;
-            color: #333;
-        }
-
-        .points-group span {
-            font-size: 24px;
-            font-weight: bold;
-            display: block;
-            margin-top: 5px;
-        }
-
-        .bonus-button {
-            margin-top: 20px;
-            padding: 10px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #007bff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        /* New button for showing who is answering */
-        .team-button {
-            margin-top: 20px;
-            padding: 10px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #28a745;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -220,36 +181,12 @@
     <!-- Game Container -->
     <div class="container">
         <h1>Bible Quiz Wordle</h1>
-
         <p class="clue" id="clueText"></p>
         <div id="questionNumber"></div>
         <div id="answer"></div>
         <input type="text" id="guess" maxlength="6" placeholder="Masukkan jawaban" oninput="toggleButton()">
         <button id="submitBtn" onclick="checkAnswer()" disabled>Submit</button>
-
-        <!-- Button to show who is answering -->
-        <button id="teamBtn" class="team-button" onclick="showAnsweringTeam()">Siapa yang menjawab?</button>
-
-        <!-- Tombol bonus round -->
-        <button id="bonusBtn" class="bonus-button" onclick="activateBonus()">Mulai Bonus Round (2x Poin)</button>
-
         <p class="thank-you" id="thankYouMessage">Terima kasih telah bermain!</p>
-    </div>
-
-    <!-- Points section near the footer -->
-    <div class="points-container">
-        <div class="points-group">
-            <h2>Tim A</h2>
-            <span id="points1">0</span>
-        </div>
-        <div class="points-group">
-            <h2>Tim B</h2>
-            <span id="points2">0</span>
-        </div>
-        <div class="points-group">
-            <h2>Tim C</h2>
-            <span id="points3">0</span>
-        </div>
     </div>
 
     <div class="footer">
@@ -307,89 +244,85 @@
         ];
 
         let currentQuestionIndex = 0;
-        let bonusActive = false;
-        let currentTeam = 1;
-
-        // Poin awal untuk masing-masing kelompok
-        const points = {
-            1: 0,
-            2: 0,
-            3: 0
-        };
-
-        function activateBonus() {
-            bonusActive = true;
-            alert('Bonus Round aktif! Poin akan digandakan untuk pertanyaan ini.');
-        }
-
-        function updatePoints() {
-            document.getElementById('points1').textContent = points[1];
-            document.getElementById('points2').textContent = points[2];
-            document.getElementById('points3').textContent = points[3];
-        }
 
         function loadQuestion() {
-            const question = questions[currentQuestionIndex];
-            document.getElementById('clueText').textContent = question.clue;
-            document.getElementById('answer').innerHTML = '';
-            document.getElementById('questionNumber').textContent = `Pertanyaan ${currentQuestionIndex + 1}`;
-            const answerLength = question.answer.length;
-
-            for (let i = 0; i < answerLength; i++) {
+            if (currentQuestionIndex >= questions.length) {
+                document.getElementById("thankYouMessage").style.display = "block";
+                document.getElementById("clueText").style.display = "none";
+                document.getElementById("questionNumber").style.display = "none";
+                document.getElementById("answer").style.display = "none";
+                document.getElementById("guess").style.display = "none";
+                document.getElementById("submitBtn").style.display = "none";
+                return;
+            }
+            const currentQuestion = questions[currentQuestionIndex];
+            document.getElementById("clueText").textContent = currentQuestion.clue;
+            document.getElementById("questionNumber").textContent = `Pertanyaan ${currentQuestionIndex + 1} dari ${questions.length}`;
+            const answerDiv = document.getElementById("answer");
+            answerDiv.innerHTML = '';
+            for (let i = 0; i < currentQuestion.answer.length; i++) {
                 const letterBox = document.createElement('div');
-                letterBox.classList.add('letter-box');
-                document.getElementById('answer').appendChild(letterBox);
+                letterBox.className = 'letter-box';
+                letterBox.id = `letter${i + 1}`;
+                answerDiv.appendChild(letterBox);
+            }
+            document.getElementById("guess").setAttribute("maxlength", currentQuestion.answer.length);
+            document.getElementById("guess").value = '';
+            toggleButton();
+        }
+
+        function checkAnswer() {
+            const userGuess = document.getElementById("guess").value.toUpperCase();
+            const currentAnswer = questions[currentQuestionIndex].answer;
+            let correct = true;
+            const letterCounts = {};
+
+            // Count occurrences of each letter in the answer
+            for (let letter of currentAnswer) {
+                letterCounts[letter] = (letterCounts[letter] || 0) + 1;
+            }
+
+            // First pass: check for correct positions
+            for (let i = 0; i < currentAnswer.length; i++) {
+                const letterBox = document.getElementById(`letter${i + 1}`);
+                letterBox.classList.remove('correct', 'incorrect', 'present');
+                if (userGuess[i] === currentAnswer[i]) {
+                    letterBox.textContent = currentAnswer[i];
+                    letterBox.classList.add('correct');
+                    letterBox.style.animation = 'bounce 0.5s';
+                    letterCounts[currentAnswer[i]]--;
+                } else {
+                    correct = false;
+                }
+            }
+
+            // Second pass: check for present letters
+            for (let i = 0; i < currentAnswer.length; i++) {
+                const letterBox = document.getElementById(`letter${i + 1}`);
+                if (!letterBox.classList.contains('correct')) {
+                    if (currentAnswer.includes(userGuess[i]) && letterCounts[userGuess[i]] > 0) {
+                        letterBox.textContent = userGuess[i];
+                        letterBox.classList.add('present');
+                        letterCounts[userGuess[i]]--;
+                    } else {
+                        letterBox.textContent = userGuess[i] || '';
+                        letterBox.classList.add('incorrect');
+                    }
+                }
+            }
+
+            if (correct) {
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    loadQuestion();
+                }, 1000);
             }
         }
 
         function toggleButton() {
-            const guess = document.getElementById('guess').value.trim();
-            document.getElementById('submitBtn').disabled = guess.length === 0;
-        }
-
-        function checkAnswer() {
-            const guess = document.getElementById('guess').value.trim().toUpperCase();
-            const question = questions[currentQuestionIndex];
-
-            let pointsToAdd;
-
-            if (guess === question.answer) {
-                alert('Jawaban benar!');
-                pointsToAdd = bonusActive ? 200 : 100;  // +200 untuk bonus, +100 biasa
-                points[currentTeam] += pointsToAdd;
-            } else {
-                alert('Jawaban salah.');
-                pointsToAdd = bonusActive ? -100 : -50;  // -100 untuk bonus, -50 biasa
-                points[currentTeam] += pointsToAdd;
-            }
-
-            updatePoints();
-
-            currentQuestionIndex++;
-            if (currentQuestionIndex >= questions.length) {
-                endGame();
-            } else {
-                loadQuestion();
-                document.getElementById('guess').value = '';
-                document.getElementById('submitBtn').disabled = true;
-            }
-
-            // Matikan bonus setelah satu kali digunakan
-            bonusActive = false;
-        }
-
-
-        function endGame() {
-            document.getElementById('clueText').textContent = '';
-            document.getElementById('questionNumber').textContent = '';
-            document.getElementById('answer').innerHTML = '';
-            document.querySelector('.thank-you').style.display = 'block';
-        }
-
-        // Tambahkan fungsi untuk menunjukkan tim yang menjawab
-        function showAnsweringTeam() {
-            alert(`Kelompok ${currentTeam} yang sedang menjawab.`);
-            currentTeam = (currentTeam % 3) + 1; // Bergantian antara Kelompok 1, 2, dan 3
+            const userGuess = document.getElementById("guess").value;
+            const submitBtn = document.getElementById("submitBtn");
+            submitBtn.disabled = userGuess.length !== questions[currentQuestionIndex].answer.length;
         }
     </script>
 </body>
